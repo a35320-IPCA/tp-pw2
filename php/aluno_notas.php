@@ -20,6 +20,7 @@ if (empty($_SESSION['authenticated'])) {
 $perfilAtual = strtolower(trim((string)($_SESSION['perfil'] ?? '')));
 $isAluno = $perfilAtual === 'aluno';
 $isFuncionario = $perfilAtual === 'funcionario';
+$tipoUtilizador = 'Aluno';
 
 if (!$isAluno) {
   if ($isFuncionario) {
@@ -146,6 +147,7 @@ $type = $_GET['type'] ?? '';
     <header class="page-hero">
       <h1>As Minhas Notas</h1>
       <p>Consulta as tuas classificações.</p>
+      <span class="role-badge">Tipo de utilizador: <?php echo e($tipoUtilizador); ?></span>
     </header>
 
     <nav>

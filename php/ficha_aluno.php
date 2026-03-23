@@ -18,6 +18,7 @@ if (empty($_SESSION['authenticated'])) {
 }
 
 $perfilAtual = strtolower(trim((string)($_SESSION['perfil'] ?? '')));
+$tipoUtilizador = 'Aluno';
 if ($perfilAtual !== 'aluno') {
   if ($perfilAtual === 'funcionario') {
     header('Location: matriculas.php');
@@ -218,6 +219,7 @@ $statusAtual = trim((string)($fichaAtual['Status'] ?? 'Sem ficha'));
     <header class="page-hero">
       <h1>Ficha de Aluno</h1>
       <p>Ao guardar a ficha, o estado fica em Rascunho ate submeteres na area do aluno.</p>
+      <span class="role-badge">Tipo de utilizador: <?php echo e($tipoUtilizador); ?></span>
     </header>
 
     <nav>

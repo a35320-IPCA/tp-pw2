@@ -148,6 +148,7 @@ $perfilAtual = strtolower(trim((string)($_SESSION['perfil'] ?? '')));
 $isAluno = $perfilAtual === 'aluno';
 $isFuncionario = $perfilAtual === 'funcionario';
 $isGestor = !$isAluno && !$isFuncionario;
+$tipoUtilizador = $isAluno ? 'Aluno' : ($isFuncionario ? 'Funcionario' : 'Gestor');
 
 if ($isAluno) {
   header('Location: aluno.php');
@@ -667,6 +668,7 @@ $rows = $conn->query("SELECT m.IdAluno, m.Nome, c.Curso, m.Status, m.Foto FROM m
     <header class="page-hero">
       <h1><?php echo $isFuncionario ? 'Pedidos de Matrícula' : 'Matrículas'; ?></h1>
       <p>Gestão de matrículas e validações.</p>
+      <span class="role-badge">Tipo de utilizador: <?php echo e($tipoUtilizador); ?></span>
     </header>
 
     <nav>

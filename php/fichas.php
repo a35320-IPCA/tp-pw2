@@ -22,6 +22,7 @@ $isAluno = $perfilAtual === 'aluno';
 $isFuncionario = $perfilAtual === 'funcionario';
 $isGestor = !$isAluno && !$isFuncionario;
 $isStaffAcademico = $isGestor || $isFuncionario;
+$tipoUtilizador = $isAluno ? 'Aluno' : ($isFuncionario ? 'Funcionario' : 'Gestor');
 
 if ($isAluno) {
 	header('Location: aluno.php');
@@ -257,6 +258,7 @@ if ($resultFichas) {
 		<header class="page-hero">
 			<h1>Fichas de Aluno</h1>
 			<p>Validação de fichas com estado Submetida.</p>
+			<span class="role-badge">Tipo de utilizador: <?php echo e($tipoUtilizador); ?></span>
 		</header>
 
 		<nav>

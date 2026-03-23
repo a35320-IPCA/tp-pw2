@@ -63,6 +63,7 @@ $perfilAtual = strtolower(trim((string)($_SESSION['perfil'] ?? '')));
 $isAluno = $perfilAtual === 'aluno';
 $isFuncionario = $perfilAtual === 'funcionario';
 $isGestor = !$isAluno && !$isFuncionario;
+$tipoUtilizador = $isAluno ? 'Aluno' : ($isFuncionario ? 'Funcionario' : 'Gestor');
 
 if ($isAluno) {
   header('Location: aluno.php');
@@ -169,6 +170,7 @@ $type = $_GET['type'] ?? '';
     <header class="page-hero">
       <h1>Plano de Estudos</h1>
       <p>Gestão das ligações curso-unidade curricular por semestre.</p>
+      <span class="role-badge">Tipo de utilizador: <?php echo e($tipoUtilizador); ?></span>
     </header>
 
     <nav>

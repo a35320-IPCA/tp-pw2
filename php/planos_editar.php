@@ -64,6 +64,7 @@ $perfilAtual = strtolower(trim((string)($_SESSION['perfil'] ?? '')));
 $isAluno = $perfilAtual === 'aluno';
 $isFuncionario = $perfilAtual === 'funcionario';
 $isGestor = !$isAluno && !$isFuncionario;
+$tipoUtilizador = $isAluno ? 'Aluno' : ($isFuncionario ? 'Funcionario' : 'Gestor');
 
 if ($isAluno) {
   header('Location: aluno.php');
@@ -292,6 +293,7 @@ if ($idCursoSelecionado > 0) {
     <header class="page-hero">
       <h1>Editar Planos de Estudo</h1>
       <p>Escolha um curso para gerir as unidades curriculares por semestre.</p>
+      <span class="role-badge">Tipo de utilizador: <?php echo e($tipoUtilizador); ?></span>
     </header>
 
     <nav>

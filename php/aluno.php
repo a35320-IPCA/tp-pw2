@@ -20,6 +20,7 @@ if (empty($_SESSION['authenticated'])) {
 $perfilAtual = strtolower(trim((string)($_SESSION['perfil'] ?? '')));
 $isAluno = $perfilAtual === 'aluno';
 $isFuncionario = $perfilAtual === 'funcionario';
+$tipoUtilizador = 'Aluno';
 
 if (!$isAluno) {
   if ($isFuncionario) {
@@ -341,6 +342,7 @@ if ($resultCursos) {
     <header class="page-hero">
       <h1>Area do Aluno</h1>
       <p>Preenche a ficha e acompanha o estado para poderes enviar matricula.</p>
+      <span class="role-badge">Tipo de utilizador: <?php echo e($tipoUtilizador); ?></span>
     </header>
 
     <nav>
