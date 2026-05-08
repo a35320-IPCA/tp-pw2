@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matriculas - IPCA VNF</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+</head>
+<body class="ipca-crud">
+<div class="page-shell">
+  <header class="page-hero">
+    <h1>Matriculas</h1>
+    <p>Gestao de matriculas e validacao de pedidos.</p>
+    <span class="role-badge">Tipo de utilizador: <%= tipoUtilizador %></span>
+  </header>
+  <nav>
+    <% if (isGestor) { %>
+      <a href="/disciplinas">Unidades Curriculares</a>
+      <a href="/cursos">Cursos</a>
+      <a href="/matriculas">Matriculas</a>
+      <a href="/fichas">Fichas de Aluno</a>
+      <a href="/planos">Planos de Estudo</a>
+      <a href="/notas">Notas e Pautas</a>
+    <% } else { %>
+      <a href="/matriculas">Matriculas</a>
+      <a href="/fichas">Fichas de Aluno</a>
+      <a href="/notas">Notas e Pautas</a>
+    <% } %>
+    <a href="/matriculas?action=logout">Terminar sessao</a>
+  </nav>
+
+  <% if (message) { %><div class="message <%= type %>"><%= message %></div><% } %>
+
+  <% if (isGestor && (action === 'create' || action === 'edit')) { %>
+    <div class="form-box">
+      <h3><%= action === 'edit' ? 'Editar matricula' : 'Nova matricula' %></h3>
+      <form method="post" action="/matriculas" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="<%= action === 'edit' ? 'update' : 'create' %>">
+        <% if (action === 'edit' && editData) { %>
+          <input type="hidden" name="IdAluno" value="<%= editData.idAluno %>">
+        <% } %>
+        <label>Aluno</label>
+        <select name="IdAlunoSelecionado" required>
+          <option value="">Selecione</option>
+          <% alunos.forEach((a) => { %>
+            <option value="<%= a._id %>" <%= Number(editData ? editData.idAluno : 0) === Number(a._id) ? 'selected' : '' %>><%= a.nome || a.login %></option>
+          <% }) %>
+        </select>
+        <label>Curso</label>
+        <select name="IdCurso" required>
+          <option value="">Selecione</option>
+          <% cursos.forEach((c) => { %>
+            <option value="<%= c._id %>" <%= Number(editData ? editData.idCurso : 0) === Number(c._id) ? 'selected' : '' %>><%= c.curso %></option>
+          <% }) %>
+        </select>
+        <label>Status</label>
+        <select name="Status" required>
+          <option value="Pendente" <%= String(editData ? editData.status : '') === 'Pendente' ? 'selected' : '' %>>Pendente</option>
+          <option value="Aceite" <%= String(editData ? editData.status : 'Aceite') === 'Aceite' ? 'selected' : '' %>>Aceite</option>
+          <option value="Rejeitada" <%= String(editData ? editData.status : '') === 'Rejeitada' ? 'selected' : '' %>>Rejeitada</option>
+        </select>
+        <label>Comprovativo</label>
+        <input type="file" name="Foto">
+        <button type="submit"><%= action === 'edit' ? 'Atualizar' : 'Criar' %></button>
+        <a class="back-link" href="/matriculas">Voltar</a>
+      </form>
+    </div>
+  <% } else { %>
+    <% if (isGestor) { %>
+      <p><a class="primary-link" href="/matriculas?action=create">+ Nova matricula</a></p>
+    <% } %>
+    <table class="matriculas-table">
+      <tr><th>ID Aluno</th><th>Nome</th><th>Curso</th><th>Status</th><th>Data</th><th>Acoes</th></tr>
+      <% rows.forEach((row) => { %>
+        <tr>
+          <td><%= row.idAluno %></td>
+          <td><%= row.nome %></td>
+          <td><%= row.curso ? row.curso.curso : '-' %></td>
+          <td><%= row.status %></td>
+          <td><%= row.data ? new Date(row.data).toISOString().slice(0,10) : '-' %></td>
+          <td class="actions">
+            <% if (isGestor) { %>
+              <a href="/matriculas?action=edit&IdAluno=<%= row.idAluno %>">Editar</a>
+              <form class="inline" method="post" action="/matriculas" onsubmit="return confirm('Eliminar matricula?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
+                <button type="submit">Eliminar</button>
+              </form>
+            <% } %>
+            <% if (isStaff && String(row.status || '').toLowerCase() === 'pendente') { %>
+              <form class="inline" method="post" action="/matriculas">
+                <input type="hidden" name="action" value="validate_request">
+                <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
+                <input type="hidden" name="Status" value="Aceite">
+                <button type="submit">Aceitar</button>
+              </form>
+              <form class="inline" method="post" action="/matriculas">
+                <input type="hidden" name="action" value="validate_request">
+                <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
+                <input type="hidden" name="Status" value="Rejeitada">
+                <button type="submit">Rejeitar</button>
+              </form>
+            <% } %>
+            <% if (row.foto) { %>
+              <a href="/matriculas?action=foto&IdAluno=<%= row.idAluno %>">Comprovativo</a>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  <% } %>
+</div>
+</body>
+</html>

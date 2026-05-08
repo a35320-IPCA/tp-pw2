@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Area do Aluno - IPCA</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="/js/ficha-transfer.js" defer></script>
+</head>
+<body class="ipca-crud">
+  <div class="page-shell">
+    <header class="page-hero">
+      <h1>Area do Aluno</h1>
+      <p>Preenche a ficha e acompanha o estado para poderes enviar matricula.</p>
+      <span class="role-badge">Tipo de utilizador: <%= tipoUtilizador %></span>
+    </header>
+
+    <nav>
+      <a href="/aluno">Minha Area</a>
+      <a href="/ficha_aluno">Ficha de Aluno</a>
+      <a href="/aluno_notas">Minhas Notas</a>
+      <a href="/aluno?action=logout">Terminar sessao</a>
+    </nav>
+
+    <% if (message) { %>
+      <div class="message <%= type %>"><%= message %></div>
+    <% } %>
+
+    <div class="form-box">
+      <h3>Ficha de Aluno</h3>
+      <% if (!ficha) { %>
+        <p>Ainda nao tens ficha de aluno submetida.</p>
+        <p><a class="primary-link" href="/ficha_aluno">Preencher ficha de aluno</a></p>
+      <% } else { %>
+        <script id="fichaAlunoData" type="application/json"><%- fichaJson %></script>
+        <p><strong>Nome:</strong> <%= ficha.nome %></p>
+        <p><strong>Status da ficha:</strong> <%= ficha.status %></p>
+        <p><button type="button" id="btnExportarFichaAluno">Transferir ficha em PDF</button></p>
+        <% if (ficha.foto) { %>
+          <img class="photo-preview" src="/aluno?action=foto_ficha" alt="Foto da ficha">
+        <% } %>
+        <% if (statusFicha === 'rejeitada') { %>
+          <p>A tua ficha foi rejeitada. Atualiza os dados e volta a submeter.</p>
+          <p><a class="primary-link" href="/ficha_aluno">Editar ficha</a></p>
+        <% } else if (statusFicha === 'rascunho') { %>
+          <p>A tua ficha esta em Rascunho. Submete para validacao.</p>
+          <form method="post" action="/aluno">
+            <input type="hidden" name="action" value="submit_ficha">
+            <button type="submit">Submeter ficha</button>
+          </form>
+        <% } else if (statusFicha === 'submetida' || statusFicha === 'pendente') { %>
+          <p>A tua ficha esta submetida e em analise. Enquanto isso, nao podes enviar matriculas.</p>
+        <% } else if (statusFicha === 'aprovada') { %>
+          <p>Ficha aprovada. Ja podes enviar matriculas.</p>
+        <% } %>
+      <% } %>
+    </div>
+
+    <div class="form-box">
+      <h3>Matricula</h3>
+      <% if (!matriculaAceite) { %>
+        <p><a class="primary-link" href="/aluno_cursos">Ver cursos e plano de estudos</a></p>
+      <% } %>
+
+      <% if (!podeMatricular) { %>
+        <p>Envio de matricula bloqueado ate a ficha de aluno ser aprovada.</p>
+      <% } else if (matriculaAceite) { %>
+        <p><strong>Estado da matricula:</strong> <%= matriculaAceite.status %></p>
+        <p><strong>Curso:</strong> <%= matriculaAceite.curso ? matriculaAceite.curso.curso : '-' %></p>
+      <% } else if (pedidosPendentes.length) { %>
+        <p>O teu pedido de matricula esta em analise:</p>
+        <ul>
+          <% pedidosPendentes.forEach((p) => { %>
+            <li><%= p.curso || '-' %> (<%= p.status %>)</li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <form method="post" action="/aluno" enctype="multipart/form-data">
+          <input type="hidden" name="action" value="request_enrollment">
+          <label for="pedido_IdCurso">Curso pretendido</label>
+          <select id="pedido_IdCurso" name="IdCurso" required>
+            <option value="">Selecione</option>
+            <% cursos.forEach((curso) => { %>
+              <option value="<%= curso._id %>"><%= curso.curso %></option>
+            <% }) %>
+          </select>
+          <label for="pedido_Foto">Comprovativo (PDF, PNG, JPG/JPEG ou WEBP)</label>
+          <input id="pedido_Foto" type="file" name="Foto" required>
+          <button type="submit">Enviar pedido de matricula</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

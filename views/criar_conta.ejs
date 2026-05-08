@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar conta - IPCA</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+</head>
+<body class="ipca-auth">
+  <div class="card">
+    <div class="brand-row">
+      <img src="/images/ipcalogo.png" alt="Logotipo IPCA">
+      <div class="brand-text">Registo de utilizador</div>
+    </div>
+    <h1>Criar conta</h1>
+    <form method="post" action="/criar_conta">
+      <label for="login">Login</label>
+      <input id="login" name="login" type="text" required value="<%= form.login || '' %>">
+
+      <label for="Idperfil">Perfil</label>
+      <select id="Idperfil" name="Idperfil" required>
+        <option value="">Selecione</option>
+        <% perfis.forEach((perfil) => { %>
+          <option value="<%= perfil._id %>" <%= Number(form.Idperfil || 0) === Number(perfil._id) ? 'selected' : '' %>><%= perfil.perfil %></option>
+        <% }) %>
+      </select>
+
+      <label for="pwd">Password</label>
+      <input id="pwd" name="pwd" type="password" required>
+
+      <button type="submit">Criar conta</button>
+    </form>
+
+    <a class="back-link" href="/login">Voltar ao login</a>
+
+    <% if (success) { %>
+      <div class="success"><%= success %></div>
+    <% } %>
+    <% if (error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+  </div>
+</body>
+</html>

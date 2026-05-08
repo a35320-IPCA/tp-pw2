@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planos de Estudo - IPCA VNF</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+</head>
+<body class="ipca-crud">
+<div class="page-shell">
+  <header class="page-hero">
+    <h1>Plano de Estudos</h1>
+    <p>Gestao das ligacoes curso-unidade curricular por semestre.</p>
+    <span class="role-badge">Tipo de utilizador: Gestor</span>
+  </header>
+  <nav>
+    <a href="/disciplinas">Unidades Curriculares</a>
+    <a href="/cursos">Cursos</a>
+    <a href="/matriculas">Matriculas</a>
+    <a href="/fichas">Fichas de Aluno</a>
+    <a href="/planos">Planos de Estudo</a>
+    <a href="/notas">Notas e Pautas</a>
+    <a href="/planos?action=logout">Terminar sessao</a>
+  </nav>
+
+  <% if (message) { %><div class="message <%= type %>"><%= message %></div><% } %>
+
+  <div class="form-box">
+    <h3>Edicao de planos de estudo</h3>
+    <a class="primary-link" href="/planos_editar">Editar planos de estudo</a>
+  </div>
+
+  <div class="form-box">
+    <h3>Criar plano de estudo</h3>
+    <form method="post" action="/planos">
+      <input type="hidden" name="action" value="create">
+      <label>Curso</label><br>
+      <select name="IdCurso" required>
+        <option value="">Selecione</option>
+        <% cursos.forEach((item) => { %>
+          <option value="<%= item._id %>"><%= item.curso %></option>
+        <% }) %>
+      </select><br>
+
+      <label>Unidade Curricular</label><br>
+      <select name="IdDisciplina" required>
+        <option value="">Selecione</option>
+        <% disciplinas.forEach((item) => { %>
+          <option value="<%= item._id %>"><%= item.disciplina %></option>
+        <% }) %>
+      </select><br>
+
+      <label>Semestre</label><br>
+      <select name="Semestre" required>
+        <option value="1">1</option>
+        <option value="2">2</option>
+      </select><br>
+
+      <button type="submit">Criar plano de estudo</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

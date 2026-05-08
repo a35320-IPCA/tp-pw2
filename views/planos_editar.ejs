@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Planos de Estudo - IPCA VNF</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+</head>
+<body class="ipca-crud">
+<div class="page-shell">
+  <header class="page-hero">
+    <h1>Editar Planos de Estudo</h1>
+    <p>Escolha um curso para gerir as unidades curriculares por semestre.</p>
+    <span class="role-badge">Tipo de utilizador: Gestor</span>
+  </header>
+  <nav>
+    <a href="/disciplinas">Unidades Curriculares</a>
+    <a href="/cursos">Cursos</a>
+    <a href="/matriculas">Matriculas</a>
+    <a href="/fichas">Fichas de Aluno</a>
+    <a href="/planos">Planos de Estudo</a>
+    <a href="/notas">Notas e Pautas</a>
+    <a href="/planos_editar?action=logout">Terminar sessao</a>
+  </nav>
+
+  <% if (message) { %><div class="message <%= type %>"><%= message %></div><% } %>
+
+  <div class="form-box">
+    <h3>Selecionar curso</h3>
+    <form method="get" action="/planos_editar">
+      <label>Curso</label><br>
+      <select name="id_curso" required>
+        <option value="">Selecione</option>
+        <% cursos.forEach((item) => { %>
+          <option value="<%= item._id %>" <%= Number(idCursoSelecionado) === Number(item._id) ? 'selected' : '' %>><%= item.curso %></option>
+        <% }) %>
+      </select><br>
+      <button type="submit">Ver plano do curso</button>
+      <a class="back-link" href="/planos">Voltar</a>
+    </form>
+  </div>
+
+  <% if (idCursoSelecionado > 0) { %>
+    <table>
+      <tr><th>Unidade Curricular</th><th>Semestre</th><th>Acoes</th></tr>
+      <% rows.forEach((row) => { %>
+        <tr>
+          <td><%= row.disciplina ? row.disciplina.disciplina : '-' %></td>
+          <td><%= row.semestre %></td>
+          <td class="actions">
+            <a href="/planos_editar?view_action=edit&id_curso=<%= row.idCurso %>&id_disciplina=<%= row.idDisciplina %>&semestre=<%= row.semestre %>">Editar</a>
+            <form class="inline" method="post" action="/planos_editar" onsubmit="return confirm('Remover ligacao do plano?');">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="IdDisciplina" value="<%= row.idDisciplina %>">
+              <input type="hidden" name="IdCurso" value="<%= row.idCurso %>">
+              <input type="hidden" name="Semestre" value="<%= row.semestre %>">
+              <button type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+
+    <div class="form-box">
+      <h3><%= editData ? 'Editar Ligacao' : 'Nova Ligacao' %></h3>
+      <form method="post" action="/planos_editar">
+        <input type="hidden" name="action" value="<%= editData ? 'update' : 'create' %>">
+        <input type="hidden" name="IdCurso" value="<%= idCursoSelecionado %>">
+        <% if (editData) { %>
+          <input type="hidden" name="old_IdDisciplina" value="<%= editData.idDisciplina %>">
+          <input type="hidden" name="old_IdCurso" value="<%= editData.idCurso %>">
+          <input type="hidden" name="old_Semestre" value="<%= editData.semestre %>">
+        <% } %>
+
+        <label>Unidade Curricular</label><br>
+        <select name="IdDisciplina" required>
+          <option value="">Selecione</option>
+          <% disciplinas.forEach((item) => { %>
+            <option value="<%= item._id %>" <%= Number(editData ? editData.idDisciplina : 0) === Number(item._id) ? 'selected' : '' %>><%= item.disciplina %></option>
+          <% }) %>
+        </select><br>
+
+        <label>Semestre</label><br>
+        <select name="Semestre" required>
+          <option value="1" <%= Number(editData ? editData.semestre : 1) === 1 ? 'selected' : '' %>>1</option>
+          <option value="2" <%= Number(editData ? editData.semestre : 1) === 2 ? 'selected' : '' %>>2</option>
+        </select><br>
+
+        <button type="submit"><%= editData ? 'Atualizar' : 'Criar' %></button>
+        <% if (editData) { %>
+          <a class="back-link" href="/planos_editar?id_curso=<%= idCursoSelecionado %>">Cancelar</a>
+        <% } %>
+      </form>
+    </div>
+  <% } %>
+</div>
+</body>
+</html>

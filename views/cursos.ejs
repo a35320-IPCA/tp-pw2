@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursos - IPCA VNF</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+</head>
+<body class="ipca-crud">
+<div class="page-shell">
+  <header class="page-hero">
+    <h1>Cursos</h1>
+    <p>Gestao de cursos disponiveis.</p>
+    <span class="role-badge">Tipo de utilizador: Gestor</span>
+  </header>
+  <nav>
+    <a href="/disciplinas">Unidades Curriculares</a>
+    <a href="/cursos">Cursos</a>
+    <a href="/matriculas">Matriculas</a>
+    <a href="/fichas">Fichas de Aluno</a>
+    <a href="/planos">Planos de Estudo</a>
+    <a href="/notas">Notas e Pautas</a>
+    <a href="/cursos?action=logout">Terminar sessao</a>
+  </nav>
+
+  <% if (message) { %><div class="message <%= type %>"><%= message %></div><% } %>
+
+  <% if (action === 'create' || action === 'edit') { %>
+    <h2><%= action === 'edit' ? 'Editar Curso' : 'Novo Curso' %></h2>
+    <div class="form-box">
+      <form method="post" action="/cursos">
+        <input type="hidden" name="action" value="<%= action === 'edit' ? 'update' : 'create' %>">
+        <% if (action === 'edit' && editData) { %>
+          <input type="hidden" name="IdCurso" value="<%= editData._id %>">
+        <% } %>
+        <label>Curso</label><br>
+        <input type="text" name="Curso" required value="<%= editData ? editData.curso : '' %>"><br>
+        <label>Sigla</label><br>
+        <input type="text" name="Sigla" required value="<%= editData ? editData.sigla : '' %>"><br>
+        <button type="submit"><%= action === 'edit' ? 'Atualizar' : 'Criar' %></button>
+        <a class="back-link" href="/cursos">Voltar a lista</a>
+      </form>
+    </div>
+  <% } else { %>
+    <p><a class="primary-link" href="/cursos?action=create">+ Novo curso</a></p>
+    <table>
+      <tr><th>Curso</th><th>Sigla</th><th>Acoes</th></tr>
+      <% cursos.forEach((row) => { %>
+        <tr>
+          <td><%= row.curso %></td>
+          <td><%= row.sigla %></td>
+          <td class="actions">
+            <a href="/cursos?action=edit&id=<%= row._id %>">Editar</a>
+            <a href="/matriculas?id_curso=<%= row._id %>">Ver matriculas</a>
+            <form class="inline" method="post" action="/cursos" onsubmit="return confirm('Remover curso?');">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="IdCurso" value="<%= row._id %>">
+              <button type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  <% } %>
+</div>
+</body>
+</html>

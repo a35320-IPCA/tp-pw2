@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursos e Plano de Estudos - IPCA</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+</head>
+<body class="ipca-crud">
+  <div class="page-shell">
+    <header class="page-hero">
+      <h1>Cursos e Plano de Estudos</h1>
+      <p>Consulta todos os cursos com unidades curriculares e semestre.</p>
+      <span class="role-badge">Tipo de utilizador: Aluno</span>
+    </header>
+
+    <nav>
+      <a href="/aluno">Minha Area</a>
+      <a href="/aluno_cursos">Cursos</a>
+      <a href="/ficha_aluno">Ficha de Aluno</a>
+      <a href="/aluno_notas">Minhas Notas</a>
+      <a href="/aluno_cursos?action=logout">Terminar sessao</a>
+    </nav>
+
+    <% if (Object.keys(cursosComPlano).length) { %>
+      <% Object.entries(cursosComPlano).forEach(([cursoNome, disciplinas]) => { %>
+        <div class="form-box">
+          <h3><%= cursoNome %></h3>
+          <% if (disciplinas.length) { %>
+            <table>
+              <tr>
+                <th>Unidade Curricular</th>
+                <th>Semestre</th>
+              </tr>
+              <% disciplinas.forEach((disc) => { %>
+                <tr>
+                  <td><%= disc.disciplina %></td>
+                  <td><%= disc.semestre %></td>
+                </tr>
+              <% }) %>
+            </table>
+          <% } else { %>
+            <p>Este curso ainda nao tem unidades curriculares associadas.</p>
+          <% } %>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="form-box">
+        <p>Nao existem cursos com plano de estudos definido.</p>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

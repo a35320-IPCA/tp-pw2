@@ -1,0 +1,33 @@
+{
+  "name": "gestaopedagogica---mongodb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "seed": "node scripts/mongodb-seed.js",
+    "seed:cluster": "node scripts/mongodb-seed.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a35320-IPCA/ipca.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/a35320-IPCA/ipca/issues"
+  },
+  "homepage": "https://github.com/a35320-IPCA/ipca#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongodb": "^7.1.1",
+    "multer": "^2.1.1"
+  }
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autenticacao - IPCA</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+</head>
+<body class="ipca-auth">
+  <div class="card">
+    <div class="brand-row">
+      <img src="/images/ipcalogo.png" alt="Logotipo IPCA">
+      <div class="brand-text">Servicos Academicos e da Gestao Pedagogica</div>
+    </div>
+    <h1>Iniciar sessao</h1>
+
+    <form method="post" action="/login">
+      <label for="login">Login</label>
+      <input id="login" name="login" type="text" autocomplete="username" required>
+
+      <label for="pwd">Palavra-passe</label>
+      <input id="pwd" name="pwd" type="password" autocomplete="current-password" required>
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <a class="secondary-btn" href="/criar_conta">Criar conta</a>
+
+    <% if (error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+  </div>
+</body>
+</html>

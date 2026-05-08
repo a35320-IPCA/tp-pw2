@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notas e Pautas - IPCA VNF</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="/js/notas-transfer.js" defer></script>
+</head>
+<body class="ipca-crud">
+<div class="page-shell">
+  <header class="page-hero">
+    <h1>Notas e Pautas</h1>
+    <p>Registo e consulta de notas.</p>
+    <span class="role-badge">Tipo de utilizador: Staff academico</span>
+  </header>
+  <nav>
+    <a href="/matriculas">Matriculas</a>
+    <a href="/fichas">Fichas de Aluno</a>
+    <a href="/notas">Notas e Pautas</a>
+    <a href="/notas?action=logout">Terminar sessao</a>
+  </nav>
+
+  <% if (message) { %><div class="message <%= type %>"><%= message %></div><% } %>
+
+  <% if (action === 'edit') { %>
+    <div class="form-box">
+      <h3>Editar nota</h3>
+      <form method="post" action="/notas">
+        <input type="hidden" name="action" value="update">
+        <input type="hidden" name="IdNota" value="<%= editData ? editData._id : '' %>">
+        <label>ID Aluno</label><input name="IdAluno" type="number" required value="<%= editData ? editData.idAluno : '' %>">
+        <label>ID Disciplina</label><input name="IdDisciplina" type="number" required value="<%= editData ? editData.idDisciplina : '' %>">
+        <label>Nota</label><input name="Nota" type="number" step="0.01" min="0" max="20" required value="<%= editData ? editData.nota : '' %>">
+        <label>Ano letivo</label><input name="AnoLetivo" required value="<%= editData ? editData.anoLetivo : '' %>">
+        <label>Epoca</label>
+        <select name="Epoca" required>
+          <option value="Normal" <%= String(editData ? editData.epoca : 'Normal') === 'Normal' ? 'selected' : '' %>>Normal</option>
+          <option value="Recurso" <%= String(editData ? editData.epoca : '') === 'Recurso' ? 'selected' : '' %>>Recurso</option>
+          <option value="Especial" <%= String(editData ? editData.epoca : '') === 'Especial' ? 'selected' : '' %>>Especial</option>
+        </select>
+        <button type="submit">Atualizar</button>
+        <a class="back-link" href="/notas">Voltar</a>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="form-box">
+      <h3>Registar nota</h3>
+      <form method="post" action="/notas">
+        <input type="hidden" name="action" value="create">
+        <label>ID Aluno</label><input name="IdAluno" type="number" required>
+        <label>ID Disciplina</label><input name="IdDisciplina" type="number" required>
+        <label>Nota</label><input name="Nota" type="number" step="0.01" min="0" max="20" required>
+        <label>Ano letivo</label><input name="AnoLetivo" required placeholder="2025/2026">
+        <label>Epoca</label>
+        <select name="Epoca" required>
+          <option value="Normal">Normal</option>
+          <option value="Recurso">Recurso</option>
+          <option value="Especial">Especial</option>
+        </select>
+        <button type="submit">Registar</button>
+      </form>
+    </div>
+  <% } %>
+
+  <div class="form-box">
+    <h3>Guardar pauta</h3>
+    <form method="post" action="/notas">
+      <input type="hidden" name="action" value="save_pauta">
+      <label>ID Disciplina</label><input name="IdDisciplinaPauta" type="number" required>
+      <label>Ano letivo</label><input name="AnoLetivoPauta" required>
+      <label>Epoca</label>
+      <select name="EpocaPauta" required>
+        <option value="Normal">Normal</option>
+        <option value="Recurso">Recurso</option>
+        <option value="Especial">Especial</option>
+      </select>
+      <label>ID Aluno (um por linha)</label>
+      <textarea id="idsPauta"></textarea>
+      <label>Nota final (um por linha)</label>
+      <textarea id="notasPauta"></textarea>
+      <div><button type="button" id="gerarCamposPauta">Gerar campos</button></div>
+      <div id="camposPauta"></div>
+      <button type="submit">Guardar pauta</button>
+    </form>
+  </div>
+
+  <script id="notasPautaData" type="application/json"><%- pautaJson %></script>
+  <p><button type="button" id="btnExportarPautaPdf">Transferir pauta em PDF</button></p>
+
+  <table>
+    <tr><th>ID Nota</th><th>ID Aluno</th><th>Aluno</th><th>Curso</th><th>UC</th><th>Nota</th><th>Ano</th><th>Epoca</th><th>Data</th><th>Situacao</th><th>Acoes</th></tr>
+    <% notas.forEach((row) => { const valor = Number(row.nota || 0); %>
+      <tr>
+        <td><%= row._id %></td>
+        <td><%= row.idAluno %></td>
+        <td><%= row.aluno ? row.aluno.login : '-' %></td>
+        <td><%= row.curso ? row.curso.curso : '-' %></td>
+        <td><%= row.disciplina ? row.disciplina.disciplina : '-' %></td>
+        <td><%= valor.toFixed(2).replace('.', ',') %></td>
+        <td><%= row.anoLetivo || '-' %></td>
+        <td><%= row.epoca || '-' %></td>
+        <td><%= formatDateTime(row.dataLancamento) %></td>
+        <td><%= valor >= 10 ? 'Aprovado' : 'Reprovado' %></td>
+        <td class="actions">
+          <button type="button" class="btnExportarNotaLinha" data-id-nota="<%= row._id %>">&#8681;</button>
+          <a href="/notas?action=edit&id_nota=<%= row._id %>">Editar</a>
+          <form class="inline" method="post" action="/notas" onsubmit="return confirm('Eliminar nota?');">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="IdNota" value="<%= row._id %>">
+            <button type="submit">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+</div>
+<script>
+(function () {
+  var btn = document.getElementById('gerarCamposPauta');
+  var container = document.getElementById('camposPauta');
+  if (!btn || !container) return;
+  btn.addEventListener('click', function () {
+    var ids = String(document.getElementById('idsPauta').value || '').split(/\r?\n/).map(function (v) { return v.trim(); }).filter(Boolean);
+    var notas = String(document.getElementById('notasPauta').value || '').split(/\r?\n/).map(function (v) { return v.trim(); });
+    container.innerHTML = '';
+    ids.forEach(function (id, index) {
+      var wrap = document.createElement('div');
+      wrap.innerHTML = '<input type="hidden" name="IdAlunoPauta" value="' + id + '"><label>Aluno ' + id + ' - Nota</label><input name="NotaFinal" value="' + (notas[index] || '') + '">';
+      container.appendChild(wrap);
+    });
+  });
+})();
+</script>
+</body>
+</html>

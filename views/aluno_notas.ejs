@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notas do Aluno - IPCA VNF</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="/js/aluno-notas.js" defer></script>
+</head>
+<body class="ipca-crud">
+  <div class="page-shell">
+    <header class="page-hero">
+      <h1>As Minhas Notas</h1>
+      <p>Consulta as tuas classificacoes.</p>
+      <span class="role-badge">Tipo de utilizador: Aluno</span>
+    </header>
+
+    <nav>
+      <a href="/aluno">Minha Area</a>
+      <a href="/aluno_notas">Minhas Notas</a>
+      <a href="/aluno_notas?action=logout">Terminar sessao</a>
+    </nav>
+
+    <% if (message) { %>
+      <div class="message <%= type %>"><%= message %></div>
+    <% } %>
+
+    <% if (!matriculaAceite) { %>
+      <div class="form-box">
+        <p>Nao tens matricula aceite. Quando tiveres matricula aceite, poderas consultar notas.</p>
+      </div>
+    <% } else { %>
+      <div class="form-box">
+        <p><strong>Aluno:</strong> <%= alunoNome %></p>
+        <p><strong>Curso:</strong> <%= matriculaAceite.curso ? matriculaAceite.curso.curso : '-' %></p>
+      </div>
+
+      <div class="form-box">
+        <h3>Notas por unidade curricular</h3>
+        <% if (notasAluno.length) { %>
+          <script id="alunoNotasData" type="application/json"><%- payloadNotasJs %></script>
+          <p>
+            <button type="button" id="btnExportarPdf">Transferir notas em PDF</button>
+            <button type="button" id="btnCalcularMedia">Calcular media</button>
+          </p>
+          <p id="mediaNotasResultado" style="display:none;"></p>
+          <table id="tabelaNotasAluno">
+            <tr>
+              <th>Unidade Curricular</th>
+              <th>Nota</th>
+              <th>Ano letivo</th>
+              <th>Epoca</th>
+              <th>Data de Lancamento</th>
+              <th>Situacao</th>
+            </tr>
+            <% notasAluno.forEach((nota) => { const valor = Number(nota.nota || 0); %>
+              <tr>
+                <td><%= nota.disciplina ? nota.disciplina.disciplina : '-' %></td>
+                <td><%= valor.toFixed(2).replace('.', ',') %></td>
+                <td><%= nota.anoLetivo || '-' %></td>
+                <td><%= nota.epoca || '-' %></td>
+                <td><%= formatDateTime(nota.dataLancamento) %></td>
+                <td><%= valor >= 10 ? 'Aprovado' : 'Reprovado' %></td>
+              </tr>
+            <% }) %>
+          </table>
+        <% } else { %>
+          <p>Ainda nao existem notas registadas para as tuas unidades curriculares.</p>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

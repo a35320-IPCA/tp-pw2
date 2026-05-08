@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fichas de Aluno - IPCA VNF</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="/js/ficha-transfer.js" defer></script>
+</head>
+<body class="ipca-crud">
+<div class="page-shell">
+  <header class="page-hero">
+    <h1>Fichas de Aluno</h1>
+    <p>Validacao de fichas com estado Submetida.</p>
+    <span class="role-badge">Tipo de utilizador: <%= tipoUtilizador %></span>
+  </header>
+  <nav>
+    <% if (isGestor) { %>
+      <a href="/disciplinas">Unidades Curriculares</a>
+      <a href="/cursos">Cursos</a>
+      <a href="/matriculas">Matriculas</a>
+      <a href="/fichas">Fichas de Aluno</a>
+      <a href="/planos">Planos de Estudo</a>
+      <a href="/notas">Notas e Pautas</a>
+    <% } else { %>
+      <a href="/matriculas">Matriculas</a>
+      <a href="/fichas">Fichas de Aluno</a>
+      <a href="/notas">Notas e Pautas</a>
+    <% } %>
+    <a href="/fichas?action=logout">Terminar sessao</a>
+  </nav>
+
+  <% if (message) { %><div class="message <%= type %>"><%= message %></div><% } %>
+
+  <div class="form-box">
+    <h3>Fichas de Aluno</h3>
+    <script id="fichasTableData" type="application/json"><%- fichasJson %></script>
+    <table class="matriculas-table fichas-table">
+      <tr>
+        <th>Nome</th><th>Idade</th><th>Telefone</th><th>Morada</th><th>NIF</th><th>Data</th><th>Status</th><th>Acoes</th>
+      </tr>
+      <% fichas.forEach((ficha) => { %>
+        <tr>
+          <td><%= ficha.nome %></td>
+          <td><%= ficha.idade %></td>
+          <td><%= ficha.telefone %></td>
+          <td><%= ficha.morada %></td>
+          <td><%= ficha.nif %></td>
+          <td><%= ficha.dataNascimento ? new Date(ficha.dataNascimento).toISOString().slice(0,10) : '' %></td>
+          <td><%= ficha.status %></td>
+          <td class="actions">
+            <button type="button" class="btnExportarFichaLinha" data-id-user="<%= ficha.idUser %>">&#8681;</button>
+            <% if (isGestor && String(ficha.status || '').toLowerCase() === 'submetida') { %>
+              <form class="inline" method="post" action="/fichas">
+                <input type="hidden" name="action" value="validate_ficha">
+                <input type="hidden" name="IdUserFicha" value="<%= ficha.idUser %>">
+                <input type="hidden" name="StatusFicha" value="Aprovada">
+                <button type="submit">Aprovar</button>
+              </form>
+              <form class="inline" method="post" action="/fichas">
+                <input type="hidden" name="action" value="validate_ficha">
+                <input type="hidden" name="IdUserFicha" value="<%= ficha.idUser %>">
+                <input type="hidden" name="StatusFicha" value="Rejeitada">
+                <button type="submit">Rejeitar</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  </div>
+</div>
+</body>
+</html>
