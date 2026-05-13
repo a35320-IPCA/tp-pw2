@@ -17,9 +17,18 @@
     <span class="role-badge">Tipo de utilizador: <%= typeof tipoUtilizador !== 'undefined' && tipoUtilizador ? tipoUtilizador : 'Funcionario' %></span>
   </header>
   <nav>
-    <a href="/matriculas">Matriculas</a>
-    <a href="/fichas">Fichas de Aluno</a>
-    <a href="/notas">Notas e Pautas</a>
+    <% if (isGestor) { %>
+      <a href="/disciplinas">Unidades Curriculares</a>
+      <a href="/cursos">Cursos</a>
+      <a href="/matriculas">Matriculas</a>
+      <a href="/fichas">Fichas de Aluno</a>
+      <a href="/planos">Planos de Estudo</a>
+      <a href="/notas">Notas e Pautas</a>
+    <% } else { %>
+      <a href="/matriculas">Matriculas</a>
+      <a href="/fichas">Fichas de Aluno</a>
+      <a href="/notas">Notas e Pautas</a>
+    <% } %>
     <a href="/notas?action=logout">Terminar sessao</a>
   </nav>
 
