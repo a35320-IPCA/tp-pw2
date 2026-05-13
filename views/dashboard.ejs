@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/ipca-theme.css">
+  <style>
+    .dashboard-shell {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 18px;
+      min-height: calc(100vh - 48px);
+      align-items: start;
+    }
+
+    .dashboard-main {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(182, 200, 230, 0.75);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      animation: riseIn 0.45s ease-out;
+    }
+
+    .dashboard-main h2 {
+      margin-top: 0;
+      font-size: 32px;
+    }
+
+    .dashboard-sidebar {
+      position: sticky;
+      top: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(244,248,255,0.96));
+      border: 1px solid #d6e3f2;
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard-sidebar h3 {
+      margin: 16px 0 10px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #5a6f91;
+    }
+
+    .dashboard-sidebar h3:first-of-type {
+      margin-top: 0;
+    }
+
+    .dashboard-sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .dash-link {
+      display: block;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #d6e3f2;
+      background: linear-gradient(180deg, #ffffff, #f4f8ff);
+      color: #17345c;
+      text-decoration: none;
+      font-weight: 800;
+      box-shadow: 0 10px 22px rgba(9, 27, 58, 0.08);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .dash-link:hover {
+      transform: translateX(-3px);
+      border-color: #a8bfe3;
+      box-shadow: 0 14px 26px rgba(9, 27, 58, 0.14);
+    }
+
+    .user-info {
+      margin-bottom: 8px;
+      padding: 14px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--bg-deep), var(--bg-mid));
+      color: #fff;
+    }
+
+    .user-info strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .user-info small {
+      color: #dbe8ff;
+    }
+
+    .logout-link {
+      margin-top: 14px;
+      background: #f8dede;
+      border-color: #e6b1b1;
+      color: #8f1d1d;
+    }
+
+    .logout-link:hover {
+      background: #f3c8c8;
+      color: #6d0f0f;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-shell">
+    <main class="dashboard-main">
+      <h2>Bem-vindo ao Dashboard</h2>
+      <p>Escolhe uma opção no painel à direita para navegar entre as páginas do sistema.</p>
+      <p>Esta área está preparada para os perfis de aluno, funcionário e gestor.</p>
+    </main>
+
+    <aside class="dashboard-sidebar">
+      <div class="user-info">
+        <strong><%= user?.login || 'Utilizador' %></strong>
+        <small><%= tipoUtilizador %></small>
+      </div>
+
+      <% sections.forEach(function(sec){ %>
+        <h3><%= sec.title %></h3>
+        <ul>
+          <% sec.items.forEach(function(item){ %>
+            <li><a class="dash-link" href="<%= item.href %>"><%= item.label %></a></li>
+          <% }) %>
+        </ul>
+      <% }) %>
+
+      <a class="dash-link logout-link" href="/login?action=logout">Terminar sessão</a>
+    </aside>
+  </div>
+</body>
+</html>

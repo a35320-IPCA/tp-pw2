@@ -37,39 +37,41 @@
   <div class="form-box">
     <h3>Fichas de Aluno</h3>
     <script id="fichasTableData" type="application/json"><%- fichasJson %></script>
-    <table class="matriculas-table fichas-table">
-      <tr>
-        <th>Nome</th><th>Idade</th><th>Telefone</th><th>Morada</th><th>NIF</th><th>Data</th><th>Status</th><th>Acoes</th>
-      </tr>
-      <% fichas.forEach((ficha) => { %>
+    <div class="table-wrap">
+      <table class="matriculas-table fichas-table">
         <tr>
-          <td><%= ficha.nome %></td>
-          <td><%= ficha.idade %></td>
-          <td><%= ficha.telefone %></td>
-          <td><%= ficha.morada %></td>
-          <td><%= ficha.nif %></td>
-          <td><%= ficha.dataNascimento ? new Date(ficha.dataNascimento).toISOString().slice(0,10) : '' %></td>
-          <td><%= ficha.status %></td>
-          <td class="actions">
-            <button type="button" class="btnExportarFichaLinha" data-id-user="<%= ficha.idUser %>">&#8681;</button>
-            <% if (isGestor && String(ficha.status || '').toLowerCase() === 'submetida') { %>
-              <form class="inline" method="post" action="/fichas">
-                <input type="hidden" name="action" value="validate_ficha">
-                <input type="hidden" name="IdUserFicha" value="<%= ficha.idUser %>">
-                <input type="hidden" name="StatusFicha" value="Aprovada">
-                <button type="submit">Aprovar</button>
-              </form>
-              <form class="inline" method="post" action="/fichas">
-                <input type="hidden" name="action" value="validate_ficha">
-                <input type="hidden" name="IdUserFicha" value="<%= ficha.idUser %>">
-                <input type="hidden" name="StatusFicha" value="Rejeitada">
-                <button type="submit">Rejeitar</button>
-              </form>
-            <% } %>
-          </td>
+          <th>Nome</th><th>Idade</th><th>Telefone</th><th>Morada</th><th>NIF</th><th>Data</th><th>Status</th><th>Acoes</th>
         </tr>
-      <% }) %>
-    </table>
+        <% fichas.forEach((ficha) => { %>
+          <tr>
+            <td><%= ficha.nome %></td>
+            <td><%= ficha.idade %></td>
+            <td><%= ficha.telefone %></td>
+            <td><%= ficha.morada %></td>
+            <td><%= ficha.nif %></td>
+            <td><%= ficha.dataNascimento ? new Date(ficha.dataNascimento).toISOString().slice(0,10) : '' %></td>
+            <td><%= ficha.status %></td>
+            <td class="actions">
+              <button type="button" class="btnExportarFichaLinha" data-id-user="<%= ficha.idUser %>">&#8681;</button>
+              <% if (isGestor && String(ficha.status || '').toLowerCase() === 'submetida') { %>
+                <form class="inline" method="post" action="/fichas">
+                  <input type="hidden" name="action" value="validate_ficha">
+                  <input type="hidden" name="IdUserFicha" value="<%= ficha.idUser %>">
+                  <input type="hidden" name="StatusFicha" value="Aprovada">
+                  <button type="submit">Aprovar</button>
+                </form>
+                <form class="inline" method="post" action="/fichas">
+                  <input type="hidden" name="action" value="validate_ficha">
+                  <input type="hidden" name="IdUserFicha" value="<%= ficha.idUser %>">
+                  <input type="hidden" name="StatusFicha" value="Rejeitada">
+                  <button type="submit">Rejeitar</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
   </div>
 </div>
 </body>

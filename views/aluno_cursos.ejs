@@ -27,18 +27,20 @@
         <div class="form-box">
           <h3><%= cursoNome %></h3>
           <% if (disciplinas.length) { %>
-            <table>
-              <tr>
-                <th>Unidade Curricular</th>
-                <th>Semestre</th>
-              </tr>
-              <% disciplinas.forEach((disc) => { %>
+            <div class="table-wrap">
+              <table>
                 <tr>
-                  <td><%= disc.disciplina %></td>
-                  <td><%= disc.semestre %></td>
+                  <th>Unidade Curricular</th>
+                  <th>Semestre</th>
                 </tr>
-              <% }) %>
-            </table>
+                <% disciplinas.forEach((disc) => { %>
+                  <tr>
+                    <td><%= disc.disciplina %></td>
+                    <td><%= disc.semestre %></td>
+                  </tr>
+                <% }) %>
+              </table>
+            </div>
           <% } else { %>
             <p>Este curso ainda nao tem unidades curriculares associadas.</p>
           <% } %>

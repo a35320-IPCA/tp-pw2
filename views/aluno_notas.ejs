@@ -46,26 +46,28 @@
             <button type="button" id="btnCalcularMedia">Calcular media</button>
           </p>
           <p id="mediaNotasResultado" style="display:none;"></p>
-          <table id="tabelaNotasAluno">
-            <tr>
-              <th>Unidade Curricular</th>
-              <th>Nota</th>
-              <th>Ano letivo</th>
-              <th>Epoca</th>
-              <th>Data de Lancamento</th>
-              <th>Situacao</th>
-            </tr>
-            <% notasAluno.forEach((nota) => { const valor = Number(nota.nota || 0); %>
+          <div class="table-wrap">
+            <table id="tabelaNotasAluno">
               <tr>
-                <td><%= nota.disciplina ? nota.disciplina.disciplina : '-' %></td>
-                <td><%= valor.toFixed(2).replace('.', ',') %></td>
-                <td><%= nota.anoLetivo || '-' %></td>
-                <td><%= nota.epoca || '-' %></td>
-                <td><%= formatDateTime(nota.dataLancamento) %></td>
-                <td><%= valor >= 10 ? 'Aprovado' : 'Reprovado' %></td>
+                <th>Unidade Curricular</th>
+                <th>Nota</th>
+                <th>Ano letivo</th>
+                <th>Epoca</th>
+                <th>Data de Lancamento</th>
+                <th>Situacao</th>
               </tr>
-            <% }) %>
-          </table>
+              <% notasAluno.forEach((nota) => { const valor = Number(nota.nota || 0); %>
+                <tr>
+                  <td><%= nota.disciplina ? nota.disciplina.disciplina : '-' %></td>
+                  <td><%= valor.toFixed(2).replace('.', ',') %></td>
+                  <td><%= nota.anoLetivo || '-' %></td>
+                  <td><%= nota.epoca || '-' %></td>
+                  <td><%= formatDateTime(nota.dataLancamento) %></td>
+                  <td><%= valor >= 10 ? 'Aprovado' : 'Reprovado' %></td>
+                </tr>
+              <% }) %>
+            </table>
+          </div>
         <% } else { %>
           <p>Ainda nao existem notas registadas para as tuas unidades curriculares.</p>
         <% } %>

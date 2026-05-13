@@ -43,24 +43,26 @@
     </div>
   <% } else { %>
     <p><a class="primary-link" href="/cursos?action=create">+ Novo curso</a></p>
-    <table>
-      <tr><th>Curso</th><th>Sigla</th><th>Acoes</th></tr>
-      <% cursos.forEach((row) => { %>
-        <tr>
-          <td><%= row.curso %></td>
-          <td><%= row.sigla %></td>
-          <td class="actions">
-            <a href="/cursos?action=edit&id=<%= row._id %>">Editar</a>
-            <a href="/matriculas?id_curso=<%= row._id %>">Ver matriculas</a>
-            <form class="inline" method="post" action="/cursos" onsubmit="return confirm('Remover curso?');">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="IdCurso" value="<%= row._id %>">
-              <button type="submit">Eliminar</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Curso</th><th>Sigla</th><th>Acoes</th></tr>
+        <% cursos.forEach((row) => { %>
+          <tr>
+            <td><%= row.curso %></td>
+            <td><%= row.sigla %></td>
+            <td class="actions">
+              <a href="/cursos?action=edit&id=<%= row._id %>">Editar</a>
+              <a href="/matriculas?id_curso=<%= row._id %>">Ver matriculas</a>
+              <form class="inline" method="post" action="/cursos" onsubmit="return confirm('Remover curso?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="IdCurso" value="<%= row._id %>">
+                <button type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
   <% } %>
 </div>
 </body>

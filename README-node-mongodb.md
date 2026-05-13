@@ -1,6 +1,6 @@
-# Migracao PHP para Node.js + MongoDB
+# Migracao para Node.js + MongoDB
 
-Este projeto ganhou um backend Node.js (Express) para substituir o backend PHP.
+Este projeto usa um backend Node.js (Express) com MongoDB.
 
 ## 1) Instalar dependencias
 
@@ -57,4 +57,4 @@ npm run dev
 
 ## Nota
 
-A interface ainda usa ficheiros PHP para renderizacao. A migracao completa de views para Node (ex.: EJS/Handlebars + rotas web) pode ser feita na proxima fase.
+A interface principal ja esta em Node com views EJS e rotas web.

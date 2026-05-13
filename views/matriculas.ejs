@@ -69,45 +69,47 @@
     <% if (isGestor) { %>
       <p><a class="primary-link" href="/matriculas?action=create">+ Nova matricula</a></p>
     <% } %>
-    <table class="matriculas-table">
-      <tr><th>ID Aluno</th><th>Nome</th><th>Curso</th><th>Status</th><th>Data</th><th>Acoes</th></tr>
-      <% rows.forEach((row) => { %>
-        <tr>
-          <td><%= row.idAluno %></td>
-          <td><%= row.nome %></td>
-          <td><%= row.curso ? row.curso.curso : '-' %></td>
-          <td><%= row.status %></td>
-          <td><%= row.data ? new Date(row.data).toISOString().slice(0,10) : '-' %></td>
-          <td class="actions">
-            <% if (isGestor) { %>
-              <a href="/matriculas?action=edit&IdAluno=<%= row.idAluno %>">Editar</a>
-              <form class="inline" method="post" action="/matriculas" onsubmit="return confirm('Eliminar matricula?');">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
-                <button type="submit">Eliminar</button>
-              </form>
-            <% } %>
-            <% if (isStaff && String(row.status || '').toLowerCase() === 'pendente') { %>
-              <form class="inline" method="post" action="/matriculas">
-                <input type="hidden" name="action" value="validate_request">
-                <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
-                <input type="hidden" name="Status" value="Aceite">
-                <button type="submit">Aceitar</button>
-              </form>
-              <form class="inline" method="post" action="/matriculas">
-                <input type="hidden" name="action" value="validate_request">
-                <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
-                <input type="hidden" name="Status" value="Rejeitada">
-                <button type="submit">Rejeitar</button>
-              </form>
-            <% } %>
-            <% if (row.foto) { %>
-              <a href="/matriculas?action=foto&IdAluno=<%= row.idAluno %>">Comprovativo</a>
-            <% } %>
-          </td>
-        </tr>
-      <% }) %>
-    </table>
+    <div class="table-wrap">
+      <table class="matriculas-table">
+        <tr><th>ID Aluno</th><th>Nome</th><th>Curso</th><th>Status</th><th>Data</th><th>Acoes</th></tr>
+        <% rows.forEach((row) => { %>
+          <tr>
+            <td><%= row.idAluno %></td>
+            <td><%= row.nome %></td>
+            <td><%= row.curso ? row.curso.curso : '-' %></td>
+            <td><%= row.status %></td>
+            <td><%= row.data ? new Date(row.data).toISOString().slice(0,10) : '-' %></td>
+            <td class="actions">
+              <% if (isGestor) { %>
+                <a href="/matriculas?action=edit&IdAluno=<%= row.idAluno %>">Editar</a>
+                <form class="inline" method="post" action="/matriculas" onsubmit="return confirm('Eliminar matricula?');">
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
+                  <button type="submit">Eliminar</button>
+                </form>
+              <% } %>
+              <% if (isStaff && String(row.status || '').toLowerCase() === 'pendente') { %>
+                <form class="inline" method="post" action="/matriculas">
+                  <input type="hidden" name="action" value="validate_request">
+                  <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
+                  <input type="hidden" name="Status" value="Aceite">
+                  <button type="submit">Aceitar</button>
+                </form>
+                <form class="inline" method="post" action="/matriculas">
+                  <input type="hidden" name="action" value="validate_request">
+                  <input type="hidden" name="IdAluno" value="<%= row.idAluno %>">
+                  <input type="hidden" name="Status" value="Rejeitada">
+                  <button type="submit">Rejeitar</button>
+                </form>
+              <% } %>
+              <% if (row.foto) { %>
+                <a href="/matriculas?action=foto&IdAluno=<%= row.idAluno %>">Comprovativo</a>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
   <% } %>
 </div>
 </body>

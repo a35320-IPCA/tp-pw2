@@ -43,23 +43,25 @@
     </div>
   <% } else { %>
     <p><a class="primary-link" href="/disciplinas?action=create">+ Nova unidade curricular</a></p>
-    <table>
-      <tr><th>Unidade Curricular</th><th>Sigla</th><th>Acoes</th></tr>
-      <% disciplinas.forEach((row) => { %>
-        <tr>
-          <td><%= row.disciplina %></td>
-          <td><%= row.sigla %></td>
-          <td class="actions">
-            <a href="/disciplinas?action=edit&id=<%= row._id %>">Editar</a>
-            <form class="inline" method="post" action="/disciplinas" onsubmit="return confirm('Remover unidade curricular?');">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="IdDisciplina" value="<%= row._id %>">
-              <button type="submit">Eliminar</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Unidade Curricular</th><th>Sigla</th><th>Acoes</th></tr>
+        <% disciplinas.forEach((row) => { %>
+          <tr>
+            <td><%= row.disciplina %></td>
+            <td><%= row.sigla %></td>
+            <td class="actions">
+              <a href="/disciplinas?action=edit&id=<%= row._id %>">Editar</a>
+              <form class="inline" method="post" action="/disciplinas" onsubmit="return confirm('Remover unidade curricular?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="IdDisciplina" value="<%= row._id %>">
+                <button type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
   <% } %>
 </div>
 </body>

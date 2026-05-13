@@ -285,7 +285,8 @@ nav a:hover {
 
 table {
   border-collapse: collapse;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   margin-top: 16px;
   background: #ffffff;
   border-radius: 12px;
@@ -346,8 +347,8 @@ tr:nth-child(even) td {
 
 .matriculas-table th:last-child,
 .matriculas-table td:last-child {
-  width: 1%;
-  min-width: 0;
+  width: auto;
+  min-width: 120px;
   white-space: nowrap;
 }
 
@@ -363,21 +364,29 @@ tr:nth-child(even) td {
 
 .table-wrap {
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure tables inside table-wrap can scroll horizontally if needed
+   and maintain a reasonable minimum width so columns don't collapse */
+.table-wrap table {
+  width: 100%;
+  min-width: 720px;
 }
 
 .fichas-table {
   width: 100%;
   min-width: 0;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .fichas-table th,
 .fichas-table td {
-  white-space: normal;
+  white-space: nowrap;
   text-align: left;
   vertical-align: middle;
-  width: 10%;
+  width: auto;
 }
 
 .fichas-table th:nth-child(2),
@@ -398,7 +407,8 @@ tr:nth-child(even) td {
 
 .fichas-table th:last-child,
 .fichas-table td:last-child {
-  white-space: normal;
+  width: 1%;
+  white-space: nowrap;
 }
 
 .status-badge {

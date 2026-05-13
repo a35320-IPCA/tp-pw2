@@ -1,7 +1,14 @@
 const { MongoClient } = require("mongodb");
 
-const mongoUri = process.env.MONGODB_URI || "mongodb://a35320_db_user:yuZbp4foOao06eJ7@ac-7esch4f-shard-00-00.iiayayl.mongodb.net:27017,ac-7esch4f-shard-00-01.iiayayl.mongodb.net:27017,ac-7esch4f-shard-00-02.iiayayl.mongodb.net:27017/?ssl=true&replicaSet=atlas-j43qb3-shard-0&authSource=admin&appName=Cluster0";
+const mongoUri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB || "ipcapw";
+
+let effectiveUri = mongoUri;
+if (!effectiveUri) {
+  // Avoid embedding credentials in source. Default to local MongoDB for development.
+  console.warn("MONGODB_URI não definido — a aplicação irá usar mongodb://localhost:27017 (sem autenticação). Para produção, defina MONGODB_URI.");
+  effectiveUri = "mongodb://localhost:27017";
+}
 
 let client;
 let db;
@@ -12,7 +19,7 @@ async function connectToDatabase() {
   }
 
   // Assumption: traditional long-running web server with moderate concurrency.
-  client = new MongoClient(mongoUri, {
+  client = new MongoClient(effectiveUri, {
     maxPoolSize: Number(process.env.MONGODB_MAX_POOL_SIZE || 30),
     minPoolSize: Number(process.env.MONGODB_MIN_POOL_SIZE || 5),
     maxIdleTimeMS: Number(process.env.MONGODB_MAX_IDLE_TIME_MS || 300000),

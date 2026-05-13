@@ -14,7 +14,7 @@
   <header class="page-hero">
     <h1>Notas e Pautas</h1>
     <p>Registo e consulta de notas.</p>
-    <span class="role-badge">Tipo de utilizador: Staff academico</span>
+    <span class="role-badge">Tipo de utilizador: <%= typeof tipoUtilizador !== 'undefined' && tipoUtilizador ? tipoUtilizador : 'Funcionario' %></span>
   </header>
   <nav>
     <a href="/matriculas">Matriculas</a>
@@ -90,32 +90,34 @@
   <script id="notasPautaData" type="application/json"><%- pautaJson %></script>
   <p><button type="button" id="btnExportarPautaPdf">Transferir pauta em PDF</button></p>
 
-  <table>
-    <tr><th>ID Nota</th><th>ID Aluno</th><th>Aluno</th><th>Curso</th><th>UC</th><th>Nota</th><th>Ano</th><th>Epoca</th><th>Data</th><th>Situacao</th><th>Acoes</th></tr>
-    <% notas.forEach((row) => { const valor = Number(row.nota || 0); %>
-      <tr>
-        <td><%= row._id %></td>
-        <td><%= row.idAluno %></td>
-        <td><%= row.aluno ? row.aluno.login : '-' %></td>
-        <td><%= row.curso ? row.curso.curso : '-' %></td>
-        <td><%= row.disciplina ? row.disciplina.disciplina : '-' %></td>
-        <td><%= valor.toFixed(2).replace('.', ',') %></td>
-        <td><%= row.anoLetivo || '-' %></td>
-        <td><%= row.epoca || '-' %></td>
-        <td><%= formatDateTime(row.dataLancamento) %></td>
-        <td><%= valor >= 10 ? 'Aprovado' : 'Reprovado' %></td>
-        <td class="actions">
-          <button type="button" class="btnExportarNotaLinha" data-id-nota="<%= row._id %>">&#8681;</button>
-          <a href="/notas?action=edit&id_nota=<%= row._id %>">Editar</a>
-          <form class="inline" method="post" action="/notas" onsubmit="return confirm('Eliminar nota?');">
-            <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="IdNota" value="<%= row._id %>">
-            <button type="submit">Eliminar</button>
-          </form>
-        </td>
-      </tr>
-    <% }) %>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <tr><th>ID Nota</th><th>ID Aluno</th><th>Aluno</th><th>Curso</th><th>UC</th><th>Nota</th><th>Ano</th><th>Epoca</th><th>Data</th><th>Situacao</th><th>Acoes</th></tr>
+      <% notas.forEach((row) => { const valor = Number(row.nota || 0); %>
+        <tr>
+          <td><%= row._id %></td>
+          <td><%= row.idAluno %></td>
+          <td><%= row.aluno ? row.aluno.login : '-' %></td>
+          <td><%= row.curso ? row.curso.curso : '-' %></td>
+          <td><%= row.disciplina ? row.disciplina.disciplina : '-' %></td>
+          <td><%= valor.toFixed(2).replace('.', ',') %></td>
+          <td><%= row.anoLetivo || '-' %></td>
+          <td><%= row.epoca || '-' %></td>
+          <td><%= formatDateTime(row.dataLancamento) %></td>
+          <td><%= valor >= 10 ? 'Aprovado' : 'Reprovado' %></td>
+          <td class="actions">
+            <button type="button" class="btnExportarNotaLinha" data-id-nota="<%= row._id %>">&#8681;</button>
+            <a href="/notas?action=edit&id_nota=<%= row._id %>">Editar</a>
+            <form class="inline" method="post" action="/notas" onsubmit="return confirm('Eliminar nota?');">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="IdNota" value="<%= row._id %>">
+              <button type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  </div>
 </div>
 <script>
 (function () {

@@ -23,7 +23,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Login ou palavra-passe invalidos." });
     }
 
-    // Hashes vindas do PHP podem usar prefixo 2y, convertido para 2b para comparacao no bcryptjs.
+    // Hashes antigas podem usar prefixo 2y, convertido para 2b para comparacao no bcryptjs.
     const normalizedHash = String(user.pwd || "").replace(/^\$2y\$/, "$2b$");
     const valid = await bcrypt.compare(pwd, normalizedHash);
     if (!valid) {

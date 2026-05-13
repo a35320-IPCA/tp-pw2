@@ -41,25 +41,27 @@
   </div>
 
   <% if (idCursoSelecionado > 0) { %>
-    <table>
-      <tr><th>Unidade Curricular</th><th>Semestre</th><th>Acoes</th></tr>
-      <% rows.forEach((row) => { %>
-        <tr>
-          <td><%= row.disciplina ? row.disciplina.disciplina : '-' %></td>
-          <td><%= row.semestre %></td>
-          <td class="actions">
-            <a href="/planos_editar?view_action=edit&id_curso=<%= row.idCurso %>&id_disciplina=<%= row.idDisciplina %>&semestre=<%= row.semestre %>">Editar</a>
-            <form class="inline" method="post" action="/planos_editar" onsubmit="return confirm('Remover ligacao do plano?');">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="IdDisciplina" value="<%= row.idDisciplina %>">
-              <input type="hidden" name="IdCurso" value="<%= row.idCurso %>">
-              <input type="hidden" name="Semestre" value="<%= row.semestre %>">
-              <button type="submit">Eliminar</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Unidade Curricular</th><th>Semestre</th><th>Acoes</th></tr>
+        <% rows.forEach((row) => { %>
+          <tr>
+            <td><%= row.disciplina ? row.disciplina.disciplina : '-' %></td>
+            <td><%= row.semestre %></td>
+            <td class="actions">
+              <a href="/planos_editar?view_action=edit&id_curso=<%= row.idCurso %>&id_disciplina=<%= row.idDisciplina %>&semestre=<%= row.semestre %>">Editar</a>
+              <form class="inline" method="post" action="/planos_editar" onsubmit="return confirm('Remover ligacao do plano?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="IdDisciplina" value="<%= row.idDisciplina %>">
+                <input type="hidden" name="IdCurso" value="<%= row.idCurso %>">
+                <input type="hidden" name="Semestre" value="<%= row.semestre %>">
+                <button type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
 
     <div class="form-box">
       <h3><%= editData ? 'Editar Ligacao' : 'Nova Ligacao' %></h3>

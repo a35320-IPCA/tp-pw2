@@ -6,8 +6,8 @@ const { getDb } = require("../config/db");
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
-const ALUNO_PAGES = ["aluno.php", "aluno_cursos.php", "ficha_aluno.php", "aluno_notas.php"];
-const STAFF_PAGES = ["disciplinas.php", "cursos.php", "matriculas.php", "fichas.php", "planos.php", "planos_editar.php", "notas.php"];
+const ALUNO_PAGES = ["aluno", "aluno_cursos", "ficha_aluno", "aluno_notas"];
+const STAFF_PAGES = ["disciplinas", "cursos", "matriculas", "fichas", "planos", "planos_editar", "notas"];
 
 function escapeRegex(text) {
   return String(text || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -36,6 +36,50 @@ function requireAuthPage(req, res) {
   }
   return true;
 }
+
+// Dashboard route - central entry point after login
+router.get("/dashboard", async (req, res) => {
+  if (!requireAuthPage(req, res)) return;
+  const r = roleInfo(req);
+
+  const sections = [];
+
+  if (r.isAluno) {
+    sections.push({ title: "Aluno", items: [
+      { href: "/aluno", label: "Minha Área" },
+      { href: "/ficha_aluno", label: "Ficha de Aluno" },
+      { href: "/aluno_notas", label: "Minhas Notas" }
+    ]});
+  }
+
+  if (r.isStaff) {
+    sections.push({ title: "Funcionário", items: [
+      { href: "/matriculas", label: "Matrículas" },
+      { href: "/notas", label: "Notas e Pautas" },
+      { href: "/fichas", label: "Fichas de Aluno" }
+    ]});
+  }
+
+  if (r.isGestor) {
+    sections.push({ title: "Gestor", items: [
+      { href: "/cursos", label: "Cursos" },
+      { href: "/disciplinas", label: "Unidades Curriculares" },
+      { href: "/planos", label: "Planos de Estudo" }
+    ]});
+  }
+
+  // common actions
+  sections.push({ title: "Geral", items: [
+    { href: "/criar_conta", label: "Criar Conta" },
+    { href: "/login?action=logout", label: "Terminar sessão" }
+  ]});
+
+  res.render("dashboard", {
+    user: req.session.user,
+    sections,
+    tipoUtilizador: r.tipoUtilizador
+  });
+});
 
 function redirectByRole(req, res) {
   const r = roleInfo(req);
@@ -276,45 +320,45 @@ router.post("/aluno", upload.any(), async (req, res) => {
 
   if (action === "submit_ficha") {
     if (!ficha) {
-      return redirectWithMessage(res, "aluno.php", "error", "Primeiro tens de criar a ficha de aluno.");
+      return redirectWithMessage(res, "aluno", "error", "Primeiro tens de criar a ficha de aluno.");
     }
     if (!["rascunho", "rejeitada"].includes(statusFicha)) {
-      return redirectWithMessage(res, "aluno.php", "error", "A ficha so pode ser submetida quando estiver em Rascunho ou Rejeitada.");
+      return redirectWithMessage(res, "aluno", "error", "A ficha so pode ser submetida quando estiver em Rascunho ou Rejeitada.");
     }
     await db.collection("fichaAluno").updateOne({ idUser: idAluno }, { $set: { status: "Submetida" } });
-    return redirectWithMessage(res, "aluno.php", "success", "Ficha submetida com sucesso.");
+    return redirectWithMessage(res, "aluno", "success", "Ficha submetida com sucesso.");
   }
 
   if (action !== "request_enrollment") {
-    return redirectWithMessage(res, "aluno.php", "error", "Acao invalida.");
+    return redirectWithMessage(res, "aluno", "error", "Acao invalida.");
   }
 
   if (statusFicha !== "aprovada") {
-    return redirectWithMessage(res, "aluno.php", "error", "So podes enviar matricula quando a ficha estiver Aprovada.");
+    return redirectWithMessage(res, "aluno", "error", "So podes enviar matricula quando a ficha estiver Aprovada.");
   }
 
   const idCurso = Number(req.body.IdCurso || 0);
   if (idCurso <= 0) {
-    return redirectWithMessage(res, "aluno.php", "error", "Seleciona um curso valido.");
+    return redirectWithMessage(res, "aluno", "error", "Seleciona um curso valido.");
   }
 
   const curso = await db.collection("cursos").findOne({ _id: idCurso }, { projection: { _id: 1 } });
   if (!curso) {
-    return redirectWithMessage(res, "aluno.php", "error", "O curso selecionado nao existe.");
+    return redirectWithMessage(res, "aluno", "error", "O curso selecionado nao existe.");
   }
 
   const file = getUploadedFile(req, "Foto");
   const foto = file?.buffer || ficha?.foto || null;
   if (!foto) {
-    return redirectWithMessage(res, "aluno.php", "error", "E obrigatorio enviar comprovativo com foto.");
+    return redirectWithMessage(res, "aluno", "error", "E obrigatorio enviar comprovativo com foto.");
   }
 
   const existing = await db.collection("matriculas").findOne({ idAluno });
   if (existing && String(existing.status || "").toLowerCase() === "aceite") {
-    return redirectWithMessage(res, "aluno.php", "error", "Ja tens uma matricula aceite.");
+    return redirectWithMessage(res, "aluno", "error", "Ja tens uma matricula aceite.");
   }
   if (existing && String(existing.status || "").toLowerCase() === "pendente") {
-    return redirectWithMessage(res, "aluno.php", "error", "Ja tens um pedido de matricula pendente.");
+    return redirectWithMessage(res, "aluno", "error", "Ja tens um pedido de matricula pendente.");
   }
 
   const doc = {
@@ -334,7 +378,7 @@ router.post("/aluno", upload.any(), async (req, res) => {
     await db.collection("matriculas").insertOne({ _id: newId, ...doc });
   }
 
-  return redirectWithMessage(res, "aluno.php", "success", "Pedido de matricula enviado com sucesso.");
+  return redirectWithMessage(res, "aluno", "success", "Pedido de matricula enviado com sucesso.");
 });
 
 router.get("/ficha_aluno", async (req, res) => {
@@ -375,12 +419,12 @@ router.post("/ficha_aluno", upload.any(), async (req, res) => {
   const nif = String(req.body.nif || "").trim();
   const dataNascimento = String(req.body.data_nascimento || "").trim();
   if (!nome || idade <= 0 || !telefone || !morada || !nif || !dataNascimento) {
-    return redirectWithMessage(res, "ficha_aluno.php", "error", "Preenche todos os campos obrigatorios.");
+    return redirectWithMessage(res, "ficha_aluno", "error", "Preenche todos os campos obrigatorios.");
   }
 
   const file = getUploadedFile(req, "foto");
   if (!existing && !file) {
-    return redirectWithMessage(res, "ficha_aluno.php", "error", "A foto e obrigatoria no primeiro envio da ficha.");
+    return redirectWithMessage(res, "ficha_aluno", "error", "A foto e obrigatoria no primeiro envio da ficha.");
   }
 
   const payload = {
@@ -401,7 +445,7 @@ router.post("/ficha_aluno", upload.any(), async (req, res) => {
     await db.collection("fichaAluno").insertOne({ _id, idUser, ...payload });
   }
 
-  return redirectWithMessage(res, "aluno.php", "success", "Ficha guardada com sucesso. Estado definido como Rascunho.");
+  return redirectWithMessage(res, "aluno", "success", "Ficha guardada com sucesso. Estado definido como Rascunho.");
 });
 
 router.get("/aluno_cursos", async (req, res) => {
@@ -501,24 +545,24 @@ router.get("/disciplinas", async (req, res) => {
 
 router.post("/disciplinas", async (req, res) => {
   if (!requireAuthPage(req, res)) return;
-  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "disciplinas.php", "error", "Sem permissoes para gerir unidades curriculares.");
+  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "disciplinas", "error", "Sem permissoes para gerir unidades curriculares.");
 
   const db = getDb();
   const action = String(req.body.action || "");
   if (action === "create") {
     const _id = await nextNumericId(db.collection("disciplinas"));
     await db.collection("disciplinas").insertOne({ _id, disciplina: String(req.body.Disciplina || "").trim(), sigla: String(req.body.Sigla || "").trim() });
-    return redirectWithMessage(res, "disciplinas.php", "success", "Disciplina criada com sucesso.");
+    return redirectWithMessage(res, "disciplinas", "success", "Disciplina criada com sucesso.");
   }
   if (action === "update") {
     await db.collection("disciplinas").updateOne({ _id: Number(req.body.IdDisciplina || 0) }, { $set: { disciplina: String(req.body.Disciplina || "").trim(), sigla: String(req.body.Sigla || "").trim() } });
-    return redirectWithMessage(res, "disciplinas.php", "success", "Disciplina atualizada com sucesso.");
+    return redirectWithMessage(res, "disciplinas", "success", "Disciplina atualizada com sucesso.");
   }
   if (action === "delete") {
     await db.collection("disciplinas").deleteOne({ _id: Number(req.body.IdDisciplina || 0) });
-    return redirectWithMessage(res, "disciplinas.php", "success", "Disciplina removida com sucesso.");
+    return redirectWithMessage(res, "disciplinas", "success", "Disciplina removida com sucesso.");
   }
-  return redirectWithMessage(res, "disciplinas.php", "error", "Acao invalida.");
+  return redirectWithMessage(res, "disciplinas", "error", "Acao invalida.");
 });
 
 router.get("/cursos", async (req, res) => {
@@ -555,24 +599,24 @@ router.get("/cursos", async (req, res) => {
 
 router.post("/cursos", async (req, res) => {
   if (!requireAuthPage(req, res)) return;
-  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "cursos.php", "error", "Sem permissoes para gerir cursos.");
+  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "cursos", "error", "Sem permissoes para gerir cursos.");
 
   const db = getDb();
   const action = String(req.body.action || "");
   if (action === "create") {
     const _id = await nextNumericId(db.collection("cursos"));
     await db.collection("cursos").insertOne({ _id, curso: String(req.body.Curso || "").trim(), sigla: String(req.body.Sigla || "").trim() });
-    return redirectWithMessage(res, "cursos.php", "success", "Curso criado com sucesso.");
+    return redirectWithMessage(res, "cursos", "success", "Curso criado com sucesso.");
   }
   if (action === "update") {
     await db.collection("cursos").updateOne({ _id: Number(req.body.IdCurso || 0) }, { $set: { curso: String(req.body.Curso || "").trim(), sigla: String(req.body.Sigla || "").trim() } });
-    return redirectWithMessage(res, "cursos.php", "success", "Curso atualizado com sucesso.");
+    return redirectWithMessage(res, "cursos", "success", "Curso atualizado com sucesso.");
   }
   if (action === "delete") {
     await db.collection("cursos").deleteOne({ _id: Number(req.body.IdCurso || 0) });
-    return redirectWithMessage(res, "cursos.php", "success", "Curso removido com sucesso.");
+    return redirectWithMessage(res, "cursos", "success", "Curso removido com sucesso.");
   }
-  return redirectWithMessage(res, "cursos.php", "error", "Acao invalida.");
+  return redirectWithMessage(res, "cursos", "error", "Acao invalida.");
 });
 
 router.get("/planos", async (req, res) => {
@@ -586,13 +630,13 @@ router.get("/planos", async (req, res) => {
 
 router.post("/planos", async (req, res) => {
   if (!requireAuthPage(req, res)) return;
-  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "planos.php", "error", "Sem permissoes para criar planos de estudo.");
-  if (String(req.body.action || "") !== "create") return redirectWithMessage(res, "planos.php", "error", "Acao invalida.");
+  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "planos", "error", "Sem permissoes para criar planos de estudo.");
+  if (String(req.body.action || "") !== "create") return redirectWithMessage(res, "planos", "error", "Acao invalida.");
 
   const db = getDb();
   const _id = await nextNumericId(db.collection("planoEstudos"));
   await db.collection("planoEstudos").insertOne({ _id, idCurso: Number(req.body.IdCurso || 0), idDisciplina: Number(req.body.IdDisciplina || 0), semestre: Number(req.body.Semestre || 1) });
-  return redirectWithMessage(res, "planos.php", "success", "Plano de estudo criado com sucesso.");
+  return redirectWithMessage(res, "planos", "success", "Plano de estudo criado com sucesso.");
 });
 
 router.get("/planos_editar", async (req, res) => {
@@ -629,27 +673,27 @@ router.get("/planos_editar", async (req, res) => {
 
 router.post("/planos_editar", async (req, res) => {
   if (!requireAuthPage(req, res)) return;
-  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "planos_editar.php", "error", "Sem permissoes para gerir planos de estudo.");
+  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "planos_editar", "error", "Sem permissoes para gerir planos de estudo.");
 
   const db = getDb();
   const action = String(req.body.action || "");
   if (action === "create") {
     const _id = await nextNumericId(db.collection("planoEstudos"));
     await db.collection("planoEstudos").insertOne({ _id, idCurso: Number(req.body.IdCurso || 0), idDisciplina: Number(req.body.IdDisciplina || 0), semestre: Number(req.body.Semestre || 1) });
-    return redirectWithMessage(res, "planos_editar.php", "success", "Ligacao criada com sucesso.", { id_curso: String(req.body.IdCurso || "") });
+    return redirectWithMessage(res, "planos_editar", "success", "Ligacao criada com sucesso.", { id_curso: String(req.body.IdCurso || "") });
   }
   if (action === "update") {
     await db.collection("planoEstudos").updateOne(
       { idCurso: Number(req.body.old_IdCurso || 0), idDisciplina: Number(req.body.old_IdDisciplina || 0), semestre: Number(req.body.old_Semestre || 0) },
       { $set: { idCurso: Number(req.body.IdCurso || 0), idDisciplina: Number(req.body.IdDisciplina || 0), semestre: Number(req.body.Semestre || 1) } }
     );
-    return redirectWithMessage(res, "planos_editar.php", "success", "Ligacao atualizada com sucesso.", { id_curso: String(req.body.IdCurso || "") });
+    return redirectWithMessage(res, "planos_editar", "success", "Ligacao atualizada com sucesso.", { id_curso: String(req.body.IdCurso || "") });
   }
   if (action === "delete") {
     await db.collection("planoEstudos").deleteOne({ idCurso: Number(req.body.IdCurso || 0), idDisciplina: Number(req.body.IdDisciplina || 0), semestre: Number(req.body.Semestre || 0) });
-    return redirectWithMessage(res, "planos_editar.php", "success", "Ligacao removida com sucesso.", { id_curso: String(req.body.IdCurso || "") });
+    return redirectWithMessage(res, "planos_editar", "success", "Ligacao removida com sucesso.", { id_curso: String(req.body.IdCurso || "") });
   }
-  return redirectWithMessage(res, "planos_editar.php", "error", "Acao invalida.");
+  return redirectWithMessage(res, "planos_editar", "error", "Acao invalida.");
 });
 
 router.get("/fichas", async (req, res) => {
@@ -690,13 +734,13 @@ router.get("/fichas", async (req, res) => {
 
 router.post("/fichas", async (req, res) => {
   if (!requireAuthPage(req, res)) return;
-  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "fichas.php", "error", "Sem permissoes para validar fichas de aluno.");
-  if (String(req.body.action || "") !== "validate_ficha") return redirectWithMessage(res, "fichas.php", "error", "Acao invalida.");
+  if (!roleInfo(req).isGestor) return redirectWithMessage(res, "fichas", "error", "Sem permissoes para validar fichas de aluno.");
+  if (String(req.body.action || "") !== "validate_ficha") return redirectWithMessage(res, "fichas", "error", "Acao invalida.");
   const idUser = Number(req.body.IdUserFicha || 0);
   const status = normalizeStatus(req.body.StatusFicha || "");
-  if (!idUser || !["Aprovada", "Rejeitada"].includes(status)) return redirectWithMessage(res, "fichas.php", "error", "Estado invalido para ficha de aluno.");
+  if (!idUser || !["Aprovada", "Rejeitada"].includes(status)) return redirectWithMessage(res, "fichas", "error", "Estado invalido para ficha de aluno.");
   await getDb().collection("fichaAluno").updateOne({ idUser, status: "Submetida" }, { $set: { status } });
-  return redirectWithMessage(res, "fichas.php", "success", "Ficha de aluno validada com sucesso.");
+  return redirectWithMessage(res, "fichas", "success", "Ficha de aluno validada com sucesso.");
 });
 
 router.get("/matriculas", async (req, res) => {
@@ -745,19 +789,19 @@ router.get("/matriculas", async (req, res) => {
 router.post("/matriculas", upload.any(), async (req, res) => {
   if (!requireAuthPage(req, res)) return;
   const r = roleInfo(req);
-  if (!r.isStaff) return redirectWithMessage(res, "matriculas.php", "error", "Sem permissoes para alterar matriculas.");
+  if (!r.isStaff) return redirectWithMessage(res, "matriculas", "error", "Sem permissoes para alterar matriculas.");
 
   const db = getDb();
   const action = String(req.body.action || "");
   if (action === "validate_request") {
     const idAluno = Number(req.body.IdAluno || 0);
     const status = normalizeStatus(req.body.Status || "");
-    if (!idAluno || !["Aceite", "Rejeitada"].includes(status)) return redirectWithMessage(res, "matriculas.php", "error", "Estado invalido para validacao de pedido.");
+    if (!idAluno || !["Aceite", "Rejeitada"].includes(status)) return redirectWithMessage(res, "matriculas", "error", "Estado invalido para validacao de pedido.");
     await db.collection("matriculas").updateOne({ idAluno, status: { $regex: /^pendente$/i } }, { $set: { status, idFuncionario: Number(req.session.user.idUser) } });
-    return redirectWithMessage(res, "matriculas.php", "success", "Pedido validado com sucesso.");
+    return redirectWithMessage(res, "matriculas", "success", "Pedido validado com sucesso.");
   }
 
-  if (!r.isGestor) return redirectWithMessage(res, "matriculas.php", "error", "Sem permissoes para alterar matriculas.");
+  if (!r.isGestor) return redirectWithMessage(res, "matriculas", "error", "Sem permissoes para alterar matriculas.");
 
   const idAlunoSel = Number(req.body.IdAlunoSelecionado || req.body.IdAluno || 0);
   const idCurso = Number(req.body.IdCurso || 0);
@@ -768,7 +812,7 @@ router.post("/matriculas", upload.any(), async (req, res) => {
   if (action === "create") {
     const _id = await nextNumericId(db.collection("matriculas"));
     await db.collection("matriculas").insertOne({ _id, idAluno: idAlunoSel, nome: String(aluno?.login || ""), idCurso, foto: foto || null, status, data: new Date(), idFuncionario: null });
-    return redirectWithMessage(res, "matriculas.php", "success", "Matricula criada com sucesso.");
+    return redirectWithMessage(res, "matriculas", "success", "Matricula criada com sucesso.");
   }
   if (action === "update") {
     const idAnterior = Number(req.body.IdAluno || 0);
@@ -776,18 +820,19 @@ router.post("/matriculas", upload.any(), async (req, res) => {
     if (foto) update.foto = foto;
     if (["Aceite", "Rejeitada"].includes(status)) update.idFuncionario = Number(req.session.user.idUser);
     await db.collection("matriculas").updateOne({ idAluno: idAnterior }, { $set: update });
-    return redirectWithMessage(res, "matriculas.php", "success", "Matricula atualizada com sucesso.");
+    return redirectWithMessage(res, "matriculas", "success", "Matricula atualizada com sucesso.");
   }
   if (action === "delete") {
     await db.collection("matriculas").deleteOne({ idAluno: Number(req.body.IdAluno || 0) });
-    return redirectWithMessage(res, "matriculas.php", "success", "Matricula removida com sucesso.");
+    return redirectWithMessage(res, "matriculas", "success", "Matricula removida com sucesso.");
   }
-  return redirectWithMessage(res, "matriculas.php", "error", "Acao invalida.");
+  return redirectWithMessage(res, "matriculas", "error", "Acao invalida.");
 });
 
 router.get("/notas", async (req, res) => {
   if (!requireAuthPage(req, res)) return;
-  if (!roleInfo(req).isStaff) return res.redirect("/aluno");
+  const r = roleInfo(req);
+  if (!r.isStaff) return res.redirect("/aluno");
 
   const db = getDb();
   const action = String(req.query.action || "list");
@@ -860,13 +905,16 @@ router.get("/notas", async (req, res) => {
     }),
     formatDateTime,
     message: String(req.query.message || ""),
-    type: String(req.query.type || "")
+    type: String(req.query.type || ""),
+    isGestor: r.isGestor,
+    isStaff: r.isStaff,
+    tipoUtilizador: r.tipoUtilizador
   });
 });
 
 router.post("/notas", async (req, res) => {
   if (!requireAuthPage(req, res)) return;
-  if (!roleInfo(req).isStaff) return redirectWithMessage(res, "notas.php", "error", "Sem permissoes para gerir notas.");
+  if (!roleInfo(req).isStaff) return redirectWithMessage(res, "notas", "error", "Sem permissoes para gerir notas.");
 
   const db = getDb();
   const action = String(req.body.action || "");
@@ -882,7 +930,7 @@ router.post("/notas", async (req, res) => {
       epoca: normalizeEpoca(req.body.Epoca || "") || "Normal",
       dataLancamento: new Date()
     });
-    return redirectWithMessage(res, "notas.php", "success", "Nota registada com sucesso.");
+    return redirectWithMessage(res, "notas", "success", "Nota registada com sucesso.");
   }
 
   if (action === "update") {
@@ -896,12 +944,12 @@ router.post("/notas", async (req, res) => {
         dataLancamento: new Date()
       }
     });
-    return redirectWithMessage(res, "notas.php", "success", "Nota atualizada com sucesso.");
+    return redirectWithMessage(res, "notas", "success", "Nota atualizada com sucesso.");
   }
 
   if (action === "delete") {
     await db.collection("notas").deleteOne({ _id: Number(req.body.IdNota || 0) });
-    return redirectWithMessage(res, "notas.php", "success", "Nota removida com sucesso.");
+    return redirectWithMessage(res, "notas", "success", "Nota removida com sucesso.");
   }
 
   if (action === "save_pauta") {
@@ -925,10 +973,10 @@ router.post("/notas", async (req, res) => {
       }
     }
 
-    return redirectWithMessage(res, "notas.php", "success", "Pauta guardada com sucesso.");
+    return redirectWithMessage(res, "notas", "success", "Pauta guardada com sucesso.");
   }
 
-  return redirectWithMessage(res, "notas.php", "error", "Acao invalida.");
+  return redirectWithMessage(res, "notas", "error", "Acao invalida.");
 });
 
 module.exports = router;

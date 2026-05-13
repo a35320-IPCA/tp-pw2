@@ -30,12 +30,23 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  if (req.path.toLowerCase().endsWith(".php")) {
+    const targetPath = req.path.slice(0, -4) || "/";
+    const queryIndex = req.originalUrl.indexOf("?");
+    const queryString = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+    return res.redirect(301, `${targetPath}${queryString}`);
+  }
+
+  next();
+});
+
 app.use("/css", express.static(path.join(__dirname, "..", "css")));
 app.use("/js", express.static(path.join(__dirname, "..", "js")));
 app.use("/images", express.static(path.join(__dirname, "..", "images")));
 
 app.get("/", (_req, res) => {
-  res.redirect("/login");
+  res.redirect("/dashboard");
 });
 
 app.use("/", webRoutes);
